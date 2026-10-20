@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ✏️ TITRE DE L'ONGLET DU NAVIGATEUR -->
+<title>Pour Ksénia, mon amour</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23e8708a'>♥</text></svg>">
+
+<!-- ============================================================
+  MODE D'EMPLOI RAPIDE
+  1. Crée un dossier "photos" à côté de ce fichier index.html.
+  2. Mets-y tes photos (ex : photo1.jpg, photo2.jpg, ...).
+  3. Cherche les commentaires "✏️ À MODIFIER" : ce sont tous les
+     endroits où tu peux écrire tes propres textes / noms de photos.
+  4. Tant qu'une photo n'existe pas, un cœur s'affiche à la place.
+     Les extensions .jpg, .jpeg, .png et .webp sont reconnues automatiquement
+     (le nom du fichier, lui, doit être exactement celui écrit dans le code).
+  5. Ouvre index.html dans ton navigateur pour voir le résultat.
+============================================================ -->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,500&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --rose: #e8708a;
+    --rose-clair: #fde8ee;
+    --rose-fonce: #b83a5b;
+    --creme: #fffaf6;
+    --texte: #4a3a40;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--creme);
+    color: var(--texte);
+    line-height: 1.7;
+  }
+  h1, h2, h3 { font-family: 'Playfair Display', serif; color: var(--rose-fonce); }
+  section { padding: 80px 20px; max-width: 1000px; margin: 0 auto; }
+  section > h2 { text-align: center; font-size: 2.2rem; margin-bottom: 10px; }
+  .sous-titre { text-align: center; margin-bottom: 50px; opacity: .8; }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    min-height: 100vh; max-width: none;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; padding: 40px 20px;
+    background: linear-gradient(160deg, var(--rose-clair), #fff 60%);
+    position: relative; overflow: hidden;
+  }
+  .hero h1 { font-size: clamp(2.5rem, 8vw, 5rem); line-height: 1.15; }
+  .hero p { max-width: 560px; margin-top: 20px; font-size: 1.1rem; }
+  .hero .photo-hero {
+    width: 220px; height: 220px; border-radius: 50%; object-fit: cover;
+    border: 6px solid #fff; box-shadow: 0 10px 30px rgba(184,58,91,.25); margin-bottom: 30px;
+  }
+  .bouton {
+    display: inline-block; margin-top: 30px; padding: 12px 30px; border-radius: 30px;
+    background: var(--rose); color: #fff; text-decoration: none; transition: .3s;
+  }
+  .bouton:hover { background: var(--rose-fonce); transform: translateY(-2px); }
+  .coeur-flottant { position: absolute; bottom: -40px; animation: monte linear forwards; opacity: .6; }
+  @keyframes monte { to { transform: translateY(-110vh) rotate(25deg); opacity: 0; } }
+
+  /* ---------- COMPTEUR ---------- */
+  .compteur-couple { margin-top: 30px; background: #fff; border-radius: 18px; padding: 18px 30px; box-shadow: 0 6px 20px rgba(184,58,91,.15); }
+  .compteur-couple .nombre { font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--rose-fonce); line-height: 1.1; }
+  .compteur-couple .detail { opacity: .8; font-size: .95rem; }
+
+  /* ---------- TIMELINE ---------- */
+  .timeline { position: relative; }
+  .timeline::before {
+    content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 3px;
+    background: var(--rose); transform: translateX(-50%); opacity: .4;
+  }
+  .evenement { position: relative; width: 50%; padding: 0 40px 50px; }
+  .evenement:nth-child(odd)  { left: 0; text-align: right; }
+  .evenement:nth-child(even) { left: 50%; }
+  .evenement::after {
+    content: '♥'; position: absolute; top: 0; width: 34px; height: 34px; line-height: 34px;
+    text-align: center; background: var(--rose); color: #fff; border-radius: 50%; font-size: 1rem;
+  }
+  .evenement:nth-child(odd)::after  { right: -17px; }
+  .evenement:nth-child(even)::after { left: -17px; }
+  .evenement .date { color: var(--rose); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; font-size: .85rem; }
+  .evenement h3 { font-size: 1.5rem; margin: 4px 0 8px; }
+  .evenement img {
+    width: 100%; max-height: 240px; object-fit: cover; border-radius: 14px;
+    margin-top: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.12);
+  }
+  .reveal { opacity: 0; transform: translateY(30px); transition: 1s; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ---------- GALERIE ---------- */
+  .galerie { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+  .galerie figure { overflow: hidden; border-radius: 14px; cursor: pointer; background: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.1); }
+  .galerie img { width: 100%; height: 250px; object-fit: cover; display: block; transition: transform .4s; }
+  .galerie figure:hover img { transform: scale(1.07); }
+  .galerie figcaption { padding: 10px 14px; font-size: .9rem; text-align: center; }
+
+  #lightbox {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.88);
+    justify-content: center; align-items: center; z-index: 100; cursor: pointer;
+  }
+  #lightbox.ouvert { display: flex; }
+  #lightbox img { max-width: 92vw; max-height: 90vh; border-radius: 10px; }
+
+  /* ---------- MEMORY ---------- */
+  .infos-memory { text-align: center; margin-bottom: 20px; font-weight: 500; }
+  .memory { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 640px; margin: 0 auto; }
+  .carte { aspect-ratio: 1; perspective: 700px; cursor: pointer; }
+  .carte-interieur { position: relative; width: 100%; height: 100%; transition: transform .5s; transform-style: preserve-3d; }
+  .carte.retournee .carte-interieur, .carte.trouvee .carte-interieur { transform: rotateY(180deg); }
+  .face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 12px; overflow: hidden; }
+  .face.dos {
+    background: linear-gradient(135deg, var(--rose), var(--rose-fonce)); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 2rem;
+  }
+  .face.devant { transform: rotateY(180deg); background: #fff; }
+  .face.devant img { width: 100%; height: 100%; object-fit: cover; }
+  .carte.trouvee .face.devant { box-shadow: 0 0 0 4px #7bc67b inset; }
+  #message-victoire { display: none; text-align: center; margin-top: 30px; font-size: 1.3rem; color: var(--rose-fonce); font-family: 'Playfair Display', serif; }
+  #bouton-rejouer { display: block; margin: 20px auto 0; border: 0; cursor: pointer; font-family: inherit; font-size: 1rem; }
+
+  /* ---------- LETTRE FINALE ---------- */
+  .lettre {
+    background: #fff; border-radius: 18px; padding: 40px 30px; box-shadow: 0 8px 30px rgba(184,58,91,.15);
+    max-width: 700px; margin: 0 auto; text-align: center; font-size: 1.05rem;
+  }
+  .lettre h2 { margin-bottom: 20px; }
+  .lettre .signature { margin-top: 24px; font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.4rem; color: var(--rose-fonce); }
+  footer { text-align: center; padding: 30px; opacity: .6; font-size: .9rem; }
+
+  /* ---------- MOBILE ---------- */
+  @media (max-width: 700px) {
+    .timeline::before { left: 18px; }
+    .evenement { width: 100%; padding: 0 0 40px 50px; text-align: left !important; left: 0 !important; }
+    .evenement::after { left: 1px !important; right: auto !important; }
+    .memory { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- ============================================================
+  SECTION 1 : PAGE D'ACCUEIL (la première chose qu'elle voit)
+============================================================ -->
+<header class="hero" id="accueil">
+  <!-- ✏️ À MODIFIER : photo ronde de vous deux (ou d'elle). Mets le nom de ta photo dans le dossier "photos" -->
+  <img class="photo-hero" src="photos/accueil.jpg" alt="Nous deux" data-ph="♥">
+
+  <!-- ✏️ À MODIFIER : le grand titre (ex : "Pour Léa, mon amour") -->
+  <h1>Pour toi, mon amour</h1>
+
+  <!-- ✏️ À MODIFIER : petit texte d'introduction sous le titre -->
+  <p>J'ai créé ce petit coin du web rien que pour nous, pour revivre ensemble tous les moments qui ont fait notre histoire.</p>
+
+  <!-- COMPTEUR : affiche le temps passé ensemble. La date se règle dans le <script> en bas
+       (cherche "✏️ DATE DE DÉBUT DE VOTRE HISTOIRE"). Ici tu peux seulement changer les textes. -->
+  <div class="compteur-couple">
+    <!-- ✏️ À MODIFIER : texte au-dessus du nombre de jours -->
+    <div class="detail">On est ensemble depuis</div>
+    <div class="nombre"><span id="compteur-jours">0</span> jours</div>
+    <!-- Ce détail (ans / mois / jours) se remplit tout seul -->
+    <div class="detail" id="compteur-detail"></div>
+  </div>
+
+  <a href="#timeline" class="bouton">Découvrir notre histoire ↓</a>
+</header>
+
+
+<!-- ============================================================
+  SECTION 2 : TIMELINE DE VOTRE RELATION
+  Pour ajouter un moment : copie un bloc <div class="evenement reveal">...</div>
+  et colle-le avant/après un autre. Ils alternent gauche/droite tout seuls.
+  Pour en supprimer un : efface le bloc entier.
+============================================================ -->
+<section id="timeline">
+  <!-- ✏️ À MODIFIER : titre et sous-titre de la timeline -->
+  <h2>Notre histoire</h2>
+  <p class="sous-titre">Depuis le premier jour jusqu'à aujourd'hui</p>
+
+  <div class="timeline">
+
+    <!-- ===== ÉVÉNEMENT 1 : votre rencontre ===== -->
+    <div class="evenement reveal">
+      <!-- ✏️ À MODIFIER : la date (ex : 14 mars 2023) -->
+      <div class="date">Date de notre rencontre</div>
+      <!-- ✏️ À MODIFIER : le titre du moment (ex : "Notre rencontre") -->
+      <h3>Le jour où tout a commencé</h3>
+      <!-- ✏️ À MODIFIER : ton texte / souvenir de ce moment -->
+      <p>Raconte ici votre rencontre : où c'était, ce que tu as ressenti en la voyant, ce dont tu te souviens.</p>
+      <!-- ✏️ À MODIFIER : nom de la photo (dans le dossier "photos") -->
+      <img src="photos/timeline1.jpg" alt="Notre rencontre" data-ph="1">
+    </div>
+
+    <!-- ===== ÉVÉNEMENT 2 : premier rendez-vous ===== -->
+    <div class="evenement reveal">
+      <!-- ✏️ À MODIFIER : la date -->
+      <div class="date">21 Octobre 2025</div>
+      <!-- ✏️ À MODIFIER : le titre -->
+      <h3>Notre premier rendez-vous</h3>
+      <!-- ✏️ À MODIFIER : ton texte -->
+      <p>Tu voulais aller faire du shopping seule pour te reposer de ton week end au par Asterix, j'ai demandé si je pouvais venir et tu as dit oui</p>
+      <p>(La c'était l'anniversaire de Sohanne, quand tout le monde l'a appris)</p>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/timeline2.jpg" alt="Premier rendez-vous" data-ph="2">
+    </div>
+
+    <!-- ===== ÉVÉNEMENT 3 : le "je t'aime" / mise en couple ===== -->
+    <div class="evenement reveal">
+      <!-- ✏️ À MODIFIER : la date -->
+      <div class="date">Date de la mise en couple</div>
+      <!-- ✏️ À MODIFIER : le titre -->
+      <h3>Le week end de notre première fois</h3>
+      <!-- ✏️ À MODIFIER : ton texte -->
+      <p>Si je me souviens bien, c'était ce week end là. Je crois que cette photo a été prise à ce moment là en tout cas.</p> <!-- Parce que elle date du 23 novembre, est clairement chez toi, et a été prise avec mon telephone de l'époque, et à 17H34, y'a quasi 100% de chance que ca soit ce week end>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/timeline3.jpg" alt="Notre couple" data-ph="3">
+    </div>
+
+    <!-- ===== ÉVÉNEMENT 4 : un voyage / souvenir marquant ===== -->
+    <div class="evenement reveal">
+      <!-- ✏️ À MODIFIER : la date -->
+      <div class="date">31 décembre/1er Janvier</div>
+      <!-- ✏️ À MODIFIER : le titre -->
+      <h3>Reveillon chez Violette</h3>
+      <!-- ✏️ À MODIFIER : ton texte -->
+      <p>On avait passé la soirée du ouvel ans chez violette, et dormi ensemble</p>
+      <p>Désolé j'ai pas la photo ou on est bien habillés 😞</p>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/timeline4.jpg" alt="Souvenir marquant" data-ph="4">
+    </div>
+
+    <!-- ===== ÉVÉNEMENT 5 : aujourd'hui ===== -->
+    <div class="evenement reveal">
+      <!-- ✏️ À MODIFIER : la date (aujourd'hui / la date de ton cadeau) -->
+      <div class="date">Janvier 2026</div>
+      <!-- ✏️ À MODIFIER : le titre -->
+      <h3>Il a neigé cette année là</h3>
+      <!-- ✏️ À MODIFIER : ton texte -->
+      <p>Et c'était super autant dans la neige qu'à la maison 😏</p>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/timeline5.jpg" alt="Aujourd'hui" data-ph="5">
+    </div>
+
+    <!-- ===== ÉVÉNEMENT 6 : aujourd'hui ===== -->
+    <div class="evenement reveal">
+      <!-- ✏️ À MODIFIER : la date (aujourd'hui / la date de ton cadeau) -->
+      <div class="date">24 Janvier 2026</div>
+      <!-- ✏️ À MODIFIER : le titre -->
+      <h3>Un dessin</h3>
+      <!-- ✏️ À MODIFIER : ton texte -->
+      <p>Tu m'as déssiné sur le dos, et c'était magnifique</p>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/timeline6.jpg" alt="Aujourd'hui" data-ph="5">
+    </div>
+
+    <!-- ===== ÉVÉNEMENT 7 : aujourd'hui ===== -->
+    <div class="evenement reveal">
+      <!-- ✏️ À MODIFIER : la date (aujourd'hui / la date de ton cadeau) -->
+      <div class="date">16 Février 2026</div>
+      <!-- ✏️ À MODIFIER : le titre -->
+      <h3>Notre st-Valentin en décalé</h3>
+      <!-- ✏️ À MODIFIER : ton texte -->
+      <p>Tu avais préparé un super date, on est retourné aux endroit où on était allé à notre premier date, tu a fait des super cadeaux. On est allé au jardin extraordinaire aussi.</p>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/timeline7.jpg" alt="Aujourd'hui" data-ph="5">
+    </div>
+
+    <!-- ===== ÉVÉNEMENT 8 : aujourd'hui ===== -->
+    <div class="evenement reveal">
+      <!-- ✏️ À MODIFIER : la date (aujourd'hui / la date de ton cadeau) -->
+      <div class="date">18 Juin 2026</div>
+      <!-- ✏️ À MODIFIER : le titre -->
+      <h3>Le bal</h3>
+      <!-- ✏️ À MODIFIER : ton texte -->
+      <p>Quel moment extraordinaire, un des meilleurs moment de l'année scolaire'</p>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/timeline8.jpg" alt="Aujourd'hui" data-ph="5">
+    </div>
+
+  <!-- ===== ÉVÉNEMENT 9 : aujourd'hui ===== -->
+    <div class="evenement reveal">
+      <!-- ✏️ À MODIFIER : la date (aujourd'hui / la date de ton cadeau) -->
+      <div class="date">du 4 au 17 Juillet 2026</div>
+      <!-- ✏️ À MODIFIER : le titre -->
+      <h3>Jaaaaard</h3>
+      <!-- ✏️ À MODIFIER : ton texte -->
+      <p>Deux super semaines qu'on a passées tous ensemble. Malgré des bas très bas à certains moments, je m'en souviens comme de super vacances, et si je pouvais, je remonterais dans le temps pour les revires</p>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/timeline9.jpg" alt="Aujourd'hui" data-ph="5">
+    </div>
+
+    <!-- ===== ÉVÉNEMENT 10 : aujourd'hui ===== -->
+    <div class="evenement reveal">
+      <!-- ✏️ À MODIFIER : la date (aujourd'hui / la date de ton cadeau) -->
+      <div class="date">21 aout 2026</div>
+      <!-- ✏️ À MODIFIER : le titre -->
+      <h3>L'adoption de Bubulle</h3>
+      <!-- ✏️ À MODIFIER : ton texte -->
+      <p>Petit chat, que diges ? Petit monstre que tu as adopté à la SPA</p>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/timeline10.jpg" alt="Aujourd'hui" data-ph="5">
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+  SECTION 3 : GALERIE PHOTOS
+  Pour ajouter une photo : copie un bloc <figure>...</figure>.
+  Un clic sur une photo l'affiche en grand.
+============================================================ -->
+<section id="galerie">
+  <!-- ✏️ À MODIFIER : titre et sous-titre de la galerie -->
+  <h2>Nos souvenirs en images</h2>
+  <p class="sous-titre">Cliquer sur une photo pour l'agrandir</p>
+
+  <div class="galerie">
+
+    <figure>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/galerie1.jpg" alt="Souvenir 1" data-ph="1">
+      <!-- ✏️ À MODIFIER : légende sous la photo -->
+      <figcaption>La dernière nuit à Jard, tous dans le salon.</figcaption>
+    </figure>
+
+    <figure>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/galerie2.jpg" alt="Souvenir 2" data-ph="2">
+      <!-- ✏️ À MODIFIER : légende -->
+      <figcaption>On avait utiliser l'outil pour écrire des mosts avec des photos satellites</figcaption>
+    </figure>
+
+    <figure>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/galerie3.jpg" alt="Souvenir 3" data-ph="3">
+      <!-- ✏️ À MODIFIER : légende -->
+      <figcaption>Je voulais te rassurer avec Gaspard</figcaption>
+    </figure>
+
+    <figure>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/galerie4.jpg" alt="Souvenir 4" data-ph="4">
+      <!-- ✏️ À MODIFIER : légende -->
+      <figcaption>Ton outfit au bal, tellement beau.</figcaption>
+    </figure>
+
+    <figure>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/galerie5.jpg" alt="Souvenir 5" data-ph="5">
+      <!-- ✏️ À MODIFIER : légende -->
+      <figcaption>Quand on allais au parc pas loin de chez moi après les cours</figcaption>
+    </figure>
+
+    <figure>
+      <!-- ✏️ À MODIFIER : nom de la photo -->
+      <img src="photos/galerie6.jpg" alt="Souvenir 6" data-ph="6">
+      <!-- ✏️ À MODIFIER : légende -->
+      <figcaption>T'es un peu folle des fois</figcaption>
+    </figure>
+
+  </div>
+</section>
+
+<!-- Fenêtre d'agrandissement des photos (ne pas toucher) -->
+<div id="lightbox"><img src="" alt=""></div>
+
+
+<!-- ============================================================
+  SECTION 4 : LE MEMORY
+  Les photos du jeu se règlent dans le <script> tout en bas,
+  repère le commentaire "PHOTOS DU MEMORY".
+  Ici tu changes seulement les textes.
+============================================================ -->
+<section id="memory">
+  <!-- ✏️ À MODIFIER : titre et sous-titre du jeu -->
+  <h2>Le jeu de notre amour</h2>
+  <p class="sous-titre">Retrouve les paires de photos : sauras-tu toutes les retrouver ?</p>
+
+  <div class="infos-memory">Coups joués : <span id="compteur">0</span></div>
+  <div class="memory" id="plateau"></div>
+
+  <!-- ✏️ À MODIFIER : le message qui s'affiche quand elle a gagné -->
+  <div id="message-victoire">Bravo Ksiouuu ! Tu as retrouvé tous nos souvenirs 💕</div>
+  <button class="bouton" id="bouton-rejouer" style="display:none">Rejouer</button>
+</section>
+
+
+<!-- ============================================================
+  SECTION 5 : LA LETTRE FINALE
+============================================================ -->
+<section id="lettre">
+  <div class="lettre reveal">
+    <!-- ✏️ À MODIFIER : titre de la lettre -->
+    <h2>Pour toi</h2>
+
+    <!-- ✏️ À MODIFIER : ta déclaration / lettre d'amour (tu peux ajouter d'autres <p>) -->
+    <p>Salut mon amour. Ca fait un an qu'on est en couple. Le temps passe si vite. Sur cette année, il y'a eu une quantitéénorme de bon moments. Quand on rentrais des cours et qu'on allais chez moi par exemple, ou même tout ces moments passés ensembkes simplement. Il y'a eu des moments spéciaux, comme la saint Valentin ou Jard, des moments durs, comme ton voyage à Cardiff ou mes voyages chez ma famille ou à Malte. Des moments très compliqués aprce que des fois je suis juste mauvais, et je t'en demande pardon. Je t'aime sincèrement Ksénia, et j'espère du plus profond de mon coeur que tout ça va continuer, et en mieux. Sans les moments durs ou compliqués. Je suis tellement éxcité à l'idée qu'on habite ensembles un jour, qu'on parte en voyage ensemble, qu'on fasses des corvées, qu'on fasse des courses, en bref, tout ces moments de vie, aussi chiants soient-ils, je veux les vivres avec toi. Et je sais que avec toi ce sera infiniment moins chiant.</p>
+    <br>
+
+    <!-- ✏️ À MODIFIER : ta signature (ton prénom, un petit mot doux...) -->
+    <p class="signature">Je t'aime, Bastien</p>
+  </div>
+</section>
+
+<!-- ✏️ À MODIFIER : le texte tout en bas de page -->
+<footer>Fait avec amour ♥</footer>
+
+
+<script>
+/* ============================================================
+   OUTIL : image de remplacement (un cœur) tant que tu n'as pas
+   mis ta vraie photo. Tu n'as rien à modifier ici.
+============================================================ */
+function placeholder(texte) {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'>
+    <rect width='400' height='400' fill='#fde8ee'/>
+    <text x='200' y='215' font-size='120' text-anchor='middle' fill='#e8708a'>♥</text>
+    <text x='200' y='300' font-size='40' text-anchor='middle' fill='#b83a5b'>${texte}</text></svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+
+/* ============================================================
+   OUTIL : reconnaissance automatique de l'extension des photos.
+   Si "photos/timeline1.jpg" est introuvable, le site essaie tout seul
+   .jpeg, .png, .webp (en minuscules et en majuscules) avant d'afficher
+   le cœur de remplacement. Tu n'as rien à modifier ici.
+   Attention : le NOM doit rester identique (même casse), seule
+   l'extension peut changer. Les photos HEIC (iPhone) ne marchent pas.
+============================================================ */
+const EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.JPG', '.JPEG', '.PNG', '.WEBP'];
+
+function essayerSuivante(img) {
+  const ph = img.dataset.ph || '♥';
+  const base = (img.dataset.base || img.getAttribute('src')).replace(/\.[A-Za-z]+$/, '');
+  const i = Number(img.dataset.essai || 0) + 1;  // prochaine extension à tester
+  img.dataset.base = base;
+  if (i < EXTENSIONS.length) {
+    img.dataset.essai = i;
+    img.src = base + EXTENSIONS[i];
+  } else {
+    img.onerror = null;                           // on arrête, on met le cœur
+    img.src = placeholder(ph);
+  }
+}
+
+// Photos du HTML (accueil, timeline, galerie)
+document.querySelectorAll('img[data-ph]').forEach(img => {
+  img.onerror = () => essayerSuivante(img);
+  // si l'image avait déjà échoué avant que ce script ne s'exécute
+  if (img.complete && img.naturalWidth === 0) essayerSuivante(img);
+});
+
+/* ============================================================
+   ✏️ PHOTOS DU MEMORY
+   Mets ici les photos qui serviront au jeu (une ligne = une paire,
+   donc 6 lignes = 12 cartes). Tu peux réutiliser les mêmes photos
+   que dans la galerie ou en prendre d'autres.
+   Pour plus de difficulté, ajoute des lignes. Pour moins, enlève-en.
+============================================================ */
+const PHOTOS_MEMORY = [
+  'photos/memory1.jpg',
+  'photos/memory2.jpg',
+  'photos/memory3.jpg',
+  'photos/memory4.jpg',
+  'photos/memory5.jpg',
+  'photos/memory6.jpg'
+];
+
+/* ============================================================
+   ✏️ DATE DE DÉBUT DE VOTRE HISTOIRE (pour le compteur)
+   Format : 'AAAA-MM-JJ'  →  année-mois-jour, avec les tirets.
+   Exemple : le 14 mars 2023 s'écrit '2023-03-14'
+   C'est la seule ligne à changer pour le compteur !
+============================================================ */
+const DATE_DEBUT = '2025-10-21';
+
+/* ---------- Compteur de jours (rien à modifier ici) ---------- */
+function majCompteur() {
+  const debut = new Date(DATE_DEBUT + 'T00:00:00');
+  const now = new Date();
+  if (isNaN(debut) || debut > now) {
+    document.getElementById('compteur-jours').textContent = 0;
+    return;
+  }
+  const jours = Math.floor((now - debut) / 86400000);
+  document.getElementById('compteur-jours').textContent = jours.toLocaleString('fr-FR');
+
+  let ans = now.getFullYear() - debut.getFullYear();
+  let mois = now.getMonth() - debut.getMonth();
+  let j = now.getDate() - debut.getDate();
+  if (j < 0) { mois--; j += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+  if (mois < 0) { ans--; mois += 12; }
+  const morceaux = [];
+  if (ans) morceaux.push(ans + (ans > 1 ? ' ans' : ' an'));
+  if (mois) morceaux.push(mois + ' mois');
+  if (j || !morceaux.length) morceaux.push(j + (j > 1 ? ' jours' : ' jour'));
+  document.getElementById('compteur-detail').textContent = 'soit ' + morceaux.join(', ');
+}
+majCompteur();
+
+/* ---------- Coeurs flottants sur la page d'accueil ---------- */
+const hero = document.getElementById('accueil');
+setInterval(() => {
+  const c = document.createElement('span');
+  c.className = 'coeur-flottant';
+  c.textContent = ['♥', '💕', '💗'][Math.floor(Math.random() * 3)];
+  c.style.left = Math.random() * 100 + '%';
+  c.style.fontSize = (14 + Math.random() * 22) + 'px';
+  c.style.animationDuration = (6 + Math.random() * 6) + 's';
+  hero.appendChild(c);
+  setTimeout(() => c.remove(), 12000);
+}, 700);
+
+/* ---------- Apparition en douceur au scroll ---------- */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: .15 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* ---------- Galerie : agrandir une photo ---------- */
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = lightbox.querySelector('img');
+document.querySelectorAll('.galerie img').forEach(img => {
+  img.addEventListener('click', () => {
+    lightboxImg.src = img.src;
+    lightbox.classList.add('ouvert');
+  });
+});
+lightbox.addEventListener('click', () => lightbox.classList.remove('ouvert'));
+
+/* ---------- Jeu de memory ---------- */
+const plateau = document.getElementById('plateau');
+const compteur = document.getElementById('compteur');
+const messageVictoire = document.getElementById('message-victoire');
+const boutonRejouer = document.getElementById('bouton-rejouer');
+
+let premiere = null, verrou = false, coups = 0, paires = 0;
+
+function melanger(tab) {
+  for (let i = tab.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [tab[i], tab[j]] = [tab[j], tab[i]];
+  }
+  return tab;
+}
+
+function nouvellePartie() {
+  plateau.innerHTML = '';
+  premiere = null; verrou = false; coups = 0; paires = 0;
+  compteur.textContent = 0;
+  messageVictoire.style.display = 'none';
+  boutonRejouer.style.display = 'none';
+
+  const cartes = melanger([...PHOTOS_MEMORY, ...PHOTOS_MEMORY].map((src, i) => ({
+    src, id: PHOTOS_MEMORY.indexOf(src), num: PHOTOS_MEMORY.indexOf(src) + 1
+  })));
+
+  cartes.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'carte';
+    el.dataset.id = c.id;
+    el.innerHTML = `
+      <div class="carte-interieur">
+        <div class="face dos">♥</div>
+        <div class="face devant"><img src="${c.src}" alt="Carte memory"></div>
+      </div>`;
+    const imgCarte = el.querySelector('img');
+    imgCarte.dataset.ph = c.num;
+    imgCarte.onerror = () => essayerSuivante(imgCarte);
+    el.addEventListener('click', () => clic(el));
+    plateau.appendChild(el);
+  });
+}
+
+function clic(carte) {
+  if (verrou || carte.classList.contains('retournee') || carte.classList.contains('trouvee')) return;
+  carte.classList.add('retournee');
+
+  if (!premiere) { premiere = carte; return; }
+
+  coups++;
+  compteur.textContent = coups;
+
+  if (premiere.dataset.id === carte.dataset.id) {
+    premiere.classList.replace('retournee', 'trouvee');
+    carte.classList.replace('retournee', 'trouvee');
+    premiere = null;
+    paires++;
+    if (paires === PHOTOS_MEMORY.length) {
+      messageVictoire.style.display = 'block';
+      boutonRejouer.style.display = 'block';
+    }
+  } else {
+    verrou = true;
+    setTimeout(() => {
+      premiere.classList.remove('retournee');
+      carte.classList.remove('retournee');
+      premiere = null; verrou = false;
+    }, 900);
+  }
+}
+
+boutonRejouer.addEventListener('click', nouvellePartie);
+nouvellePartie();
+</script>
+</body>
+</html>
